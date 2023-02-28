@@ -17,33 +17,57 @@ class Scraper:
 
     def click(self, element):
         ActionChains(self.driver).move_to_element(element).click(element).perform()
+    
+    def xpath_click(self, xpath):
+        element = self.driver.find_element(By.XPATH, xpath)
+        ActionChains(self.driver).move_to_element(element).click(element).perform()
+
+    def xpath_wait_visibility(self, xpath):
+        self.wait.until(EC.visibility_of_element_located((By.XPATH, xpath)))
 
     def accept_cookies(self):
         cookie_xpath = '//*[@id="gdpr-cookie-accept"]'
-        cookie = self.driver.find_element(By.XPATH, cookie_xpath)
-        self.click(cookie)
+        self.xpath_click(cookie_xpath)
     
-    def login(self):
+    
+    def login(self, username, password):
         login_xpath = '//*[@id="loginLink"]'
         login = self.wait.until(EC.element_to_be_clickable((By.XPATH, login_xpath)))
         self.click(login)
         #wait for modal for open
-        self.wait.until(EC.visibility_of_element_located((By.XPATH, '/html/body/div[1]/div/div[3]/div[5]/div[1]/div/div/div')))
+        
+        self.wait.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="modalLogin"]')))
 
         print("login modal opened")
 
-        # utorid_button_xpath = '/html/body/div[1]/div/div[3]/div[4]/div[1]/div/div/div/div[2]/div[1]/div[6]/div/button'
-        # utorid_button= self.wait.until(EC.element_to_be_clickable((By.XPATH, utorid_button_xpath)))
-        # self.click(utorid_button)
+        button_xpath = '/html/body/div[1]/div/div[3]/div[5]/div[1]/div/div/div/div[2]/div[1]/div[6]/div/button'
+        self.xpath_click(button_xpath)
+
+        #input username and password
+
+        self.wait.until(EC.visibility_of_element_located((By.ID, 'username')))
+
+        username_button = self.driver.find_element(By.ID, 'username')
+        password_button = self.driver.find_element(By.ID, 'password')
+
+        username_button.send_keys(username)
+        password_button.send_keys(password)
+
+        uoft_weblogin_button_xpath = '/html/body/div/div/div[1]/div[2]/form/button'
+        self.xpath_click(uoft_weblogin_button_xpath)
 
 
 
     def court_bookings_page(self):
         court_bookings_url = '/html/body/div[1]/div/div[3]/div[2]/div[2]/div[1]/div[16]/a'
+        self.xpath_wait_visibility(court_bookings_url)
         self.driver.execute_script("return document.body.scrollHeight")
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        court_bookings = self.driver.find_element(By.XPATH, court_bookings_url)
-        self.click(court_bookings)
+        self.xpath_click(court_bookings_url)
+    
+
+    def get_court_info(self):
+        pass
 
 
     def scrape_court(self, court_num):
@@ -53,9 +77,6 @@ class Scraper:
         self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         book_court = self.driver.find_element(By.XPATH, court1_xpath)
         self.click(book_court)
-
-
-
 
     
 
@@ -83,6 +104,7 @@ def scrape():
 if __name__ == "__main__":
     s = Scraper()
     s.accept_cookies()
-    s.login()
+    s.login('choimat4', 'Matthew9655')
+    s.court_bookings_page()
     # s.court_bookings_page()
     # s.scrape_court(1)
